@@ -1,0 +1,242 @@
+{
+    "dimensions": [
+        {
+         "name":"users",
+         "label":"Users",
+         "levels": [
+                 {
+                    "name":"user_device",
+                    "label":"user_device"
+                    
+                },
+                
+                {
+                    "name":"user_dob",
+                    "label":"user_dob"
+                    
+                }
+                
+            ]
+        },
+        
+        {"name":"asset",
+        "label":"assets",
+         "attributes":["id","asset_name"]
+       
+        
+        
+            },
+     {
+         "name":"date",
+         "label":"Date",
+          "role": "time",
+        "info": {
+                "cv-datefilter-hierarchy": "weekly"
+            },
+            
+        
+         "levels": [
+        {
+            "name": "year", 
+            "label": "Year",
+            "role": "year",
+            "info": { "user_dob": "year" }
+        },
+               {
+                    "name":"month",
+                    "label":"month",
+                    "role": "month"
+                },
+                
+              
+               {
+                   "name":"day",
+                   "label":"day","role": "day"
+                   
+        }
+    ],"hierarchies": [
+                {
+                    "name": "weekly",
+                    "label": "Weekly",
+                    "levels": [ "year", "day"]
+                },
+                {
+                    "name": "monthly",
+                    "label": "Monthly",
+                    "levels": [ "year", "day", "month"]
+
+                }
+            ]
+    
+        },
+    
+        {
+         "name":"brand_id",
+         "label":"brand",
+         "attributes":["id","brand_name"]
+          
+         
+        },
+        {"name":"brand","label":"brands","attributes":["brand_id","brand_name"]
+        
+
+            },
+        {
+            "name":"deals",
+            "label":"Deals",
+            
+            "levels":[{
+                "name":"dealname",
+                "label":"deal_name"
+                },{
+                "name":"year",
+                "label":"by_year"
+                }
+                ]
+        }
+        
+    ],
+    "cubes": [
+        {
+            "name": "user_tbl",
+            "dimensions": ["users","brand_id","date"],
+            "measures": [{"name":"user_id", "label":"user_id"}],
+            "aggregates": [
+                    
+                    {
+                        "name": "record_count",
+                        "function": "count",
+                        "measure":"user_id"
+                    }
+                ],
+            "mappings": {
+                          
+                            
+                            "users.user_device":"user_tbl.user_device",
+                            "users.user_dob":"user_dob",
+                            "date.year":{"column":"user_dob","extract":"year"},
+                            
+                             "date.month":{"column":"user_dob","extract":"month"},
+                            "date.day":{"column":"user_dob","extract":"day"},
+                            "brand_id.id":"user_tbl.user_brand_id",
+                            
+                            "brand_id.brand_name":"brand.brand_code"
+                            
+                         },
+                         "joins":[{
+                                "master": "user_tbl.user_brand_id",
+                                "detail": "brand.brand_id"
+                            
+
+                            }],
+                             
+
+            "info": {
+                "min_date": "2010-01-01",
+                "max_date": "2010-12-31"
+                
+            }
+        },
+        {
+        "name": "deals",
+            "dimensions": ["deals"],
+            "measures": [{"name":"deal_asset_card","label":"Deal_assets"},
+            { "name":"deal_id", "label":"deal_id"}],
+            "aggregates": [
+                    
+                    {
+                        "name":"assets_sum",
+                        "function":"sum",
+                        "measure":"deal_asset_card"
+                        
+                    },
+                    {
+                        "name":"assets_count",
+                        "function":"count",
+                        "measure":"deal_id"
+                        
+                    }
+
+                ],
+            "mappings": {
+                          "deals.dealname":"deal_nm",
+                          "deals.year":{"column":"deal_start_date","extract":"year"}  ,                         
+                          "deals.device_type_id":"device_type_id",
+                          "deals.device_uuid":"device_uuid"
+                         }
+                     },
+{
+          "name": "assets",
+            "dimensions": ["asset","brand_id"],
+            "measures": [{"name":"asset_seq_id","label":"assets_count"}],
+            "aggregates": [
+                    
+                    
+                    {
+                        "name":"assets_count",
+                        "function":"count",
+                        "measure":"asset_seq_id"
+                        
+                    }
+
+                ],
+                
+            "mappings": {
+                         "asset.id":"assets.asset_seq_id",
+                          "asset.asset_name":"assets.asset_name",
+                          "asset.asset_name":"assets.asset_type",
+                          "brand_id.id":"assets.brand_id",
+                            
+                        "brand_id.brand_name":"brand.brand_code"
+                            
+                         },
+                         "joins":[{
+                                "master": "assets.brand_id",
+                                "detail": "brand.brand_id"
+                            
+
+                            }]
+
+                     },
+                     {
+          "name": "brand",
+            "dimensions": ["brand","asset"],
+            "measures": [{"name":"brand_id","label":"brands_count"}],
+            "aggregates": [
+                    
+                    
+                    {
+                        "name":"brands_count",
+                        "function":"count",
+                        "measure":"brand_id"
+                        
+                    }
+
+                ],
+            "mappings": {
+                          "brand.id":"brand.brand_id",
+                          "brand.brand_name":"brand.brand_code",
+                           "asset.id":"assets.brand_id",
+                          "asset.asset_name":"assets.asset_name"
+                          
+                         
+                          
+                          
+                            
+                       
+                            
+                         },
+                         "joins":[{
+                                "master": "brand.brand_id",
+                                "detail": "assets.brand_id"
+                            
+
+                            }]
+
+                         
+                     }
+
+       
+             
+    ]
+}
